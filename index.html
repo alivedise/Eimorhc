@@ -28,6 +28,7 @@
     hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
     .footer { text-align:center; padding-top:30px; font-style: italic; }
   </style>
+  <script type="javascript" src="https://raw.github.com/alivedise/Eimorhc/master/breaker/eimorhc.breaker.js"></script>
 </head>
 
 <body>
@@ -51,7 +52,9 @@
 
     
       <p>This is a html-based game from ff13-2 time labyrinth.</p>
-    
+
+	  <h2>Demo</h2>
+	  <div id="eimorhc"></div>
 
     
       <h2>Dependencies</h2>
@@ -60,10 +63,13 @@
 
     
       <h2>Install</h2>
-      <p>* Click the number on the clock to rotate the hour hands.
-* Click reset button to restart the same puzzle.
-* Click new button to create a new puzzle.
-* Enjoy it!</p>
+	  <p>
+	  <ul>
+		  <li> Click the number on the clock to rotate the hour hands.</li>
+		<li> Click reset button to restart the same puzzle.</li>
+		<li> Click new button to create a new puzzle.</li>
+		<li> Enjoy it!</li>
+		</ul>
     
 
     
@@ -95,6 +101,9 @@
     <div class="footer">
       get the source code on GitHub : <a href="https://github.com/alivedise/Eimorhc">alivedise/Eimorhc</a>
     </div>
+		<script type='text/javascript'>	
+			$('#eimorhc').eimorhc_breaker();
+		</script>
 
   </div>
 
