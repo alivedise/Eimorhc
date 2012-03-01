@@ -13716,15 +13716,6 @@ if (!window.CanvasRenderingContext2D) {
 
 } // if
 ;
-<div id="top">
-	<div id="canvas" style="float: left; display: inline-block;">
-		<canvas width="300" height="300"></canvas>
-	</div>
-	<div id="result"></div>
-	<button id="reset">Reset</button>
-	<button id="new">New</button>
-</div>
-;
 (function($){
 
 /**
