@@ -13763,6 +13763,7 @@ $.Controller('Eimorhc.Breaker',
 	available: [],
 	init : function(){
 		var self = this;
+	
 		this.vars = $.extend($('<div>')[0], {
 			angle: 0,
 			plus: 0,
@@ -13779,8 +13780,10 @@ $.Controller('Eimorhc.Breaker',
 			fx.elem.updated = true;
 		};
 		this.element.html("./views/init.ejs",{}, this.callback('render'));
+		;
 	},
 	render: function(){
+		;
 		var self = this;
 		setInterval(function(){
 			if (!self.vars.updated) return;
@@ -13819,8 +13822,8 @@ $.Controller('Eimorhc.Breaker',
 		ctx.fillStyle = 'black';
 		ctx.font= 'bold 18px sans-serif';
 		ctx.fill();
-		var slice = index/self.puzzle.length;
 		$.each(self.puzzle, function(index, value){
+				var slice = index/self.puzzle.length;
 				if(self.available[index] && !self.steped[index])
 				{
 					ctx.beginPath();
@@ -13868,6 +13871,7 @@ $.Controller('Eimorhc.Breaker',
 		ctx.stroke();
 	},
 	'#new click': function(){
+//		window.location.hash = 
 		this.render();
 	},
 	'#reset click': function(){
