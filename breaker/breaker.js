@@ -1,4 +1,4 @@
-steal( 'jquery/controller','jquery/view/ejs','./breaker.css' )
+steal( 'jquery/controller','jquery/view/ejs','./breaker.css','resource/jquery/excanvas' )
 	.then( './views/init.ejs', function($){
 
 /**
@@ -26,7 +26,7 @@ $.Controller('Eimorhc.Breaker',
 	},
 	init: function(){
 		this.img = new Image();  
-		this.img.src = 'pointer.png';  
+		this.img.src = './y.png';  
 	},
 	img: null
 },
@@ -34,10 +34,14 @@ $.Controller('Eimorhc.Breaker',
 {
 	vars: null,
 	steped: [],
+	available: [],
 	init : function(){
 		var self = this;
 		this.vars = $.extend($('<div>')[0], {
 			angle: 0,
+			plus: 0,
+			minus: 0,
+			end: false,
 			customAnimate: true,
 			updated: true
 		});
@@ -58,6 +62,7 @@ $.Controller('Eimorhc.Breaker',
 			self.renderClock();
 		}, 30);
 		this.generateRandomPuzzle();
+		$('#result').html('SYNCHRONIZE THE TIMELINE!').css({color: 'black'});
 		$(this.vars).animate({ angle: 0, plus: 0, minus: 0 }, { duration: 2000, queue: false });
 	},
 	generateRandomPuzzle: function(){
@@ -73,34 +78,51 @@ $.Controller('Eimorhc.Breaker',
 		{
 			this.puzzle[token[i]] = (token.length+token[i]-token[(i+1)%token.length])%token.length > (token.length+token[(i+1)%token.length]-token[i])%token.length ? (token.length+token[(i+1)%token.length]-token[i])%token.length: (token.length+token[i]-token[(i+1)%token.length])%token.length;
 			this.steped[i] = false;
+			this.available[i] = true;
 		}
 		steal.dev.log(this.puzzle);
 	},
 	renderClock: function(){
 		var canvas = this.element.find('#canvas canvas')[0], self = this;
 		var ctx = canvas.getContext("2d");
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ctx.save();
 		var options = self.constructor.defaults.canvas;
-		ctx.translate(options.x,options.y);
-		ctx.rotate(this.vars.angle+2*Math.PI*(this.vars.plus/this.puzzle.length));
-		ctx.drawImage(this.constructor.img,-5,-options.y/2+5);  
-		ctx.restore();
-		ctx.save();
-		ctx.translate(options.x,options.y);
-		ctx.rotate(this.vars.angle+2*Math.PI*(this.vars.minus/this.puzzle.length));
-		ctx.drawImage(this.constructor.img,-5,-options.y/2+5);  
-		ctx.restore();
-		ctx.save();
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
 		ctx.beginPath();
 		ctx.arc(options.x,options.y,options.C,0,Math.PI*2,true); // 外圈
+		ctx.fillStyle = 'black';
 		ctx.font= 'bold 18px sans-serif';
+		ctx.fill();
+		var slice = index/self.puzzle.length;
 		$.each(self.puzzle, function(index, value){
-				ctx.fillStyle = self.constructor.defaults.color[value];
-				ctx.fillText(value, options.x-6+options.r*Math.sin(2*Math.PI*index/(self.puzzle.length)), options.y+6-options.r*Math.cos(2*Math.PI*index/(self.puzzle.length)));   
+				if(self.available[index] && !self.steped[index])
+				{
+					ctx.beginPath();
+					ctx.fillStyle = "#0186d1";
+					ctx.strokeStyle = "#0186d1";
+					ctx.arc(options.x+options.r*Math.sin(2*Math.PI*slice), options.y-options.r*Math.cos(2*Math.PI*slice), 10, 0, Math.PI*2, true);   
+					ctx.fill();
+					ctx.closePath();
+				}
+				if(!self.steped[index])
+				{
+					ctx.fillStyle = self.constructor.defaults.color[value];
+					ctx.fillText(value, options.x-6+options.r*Math.sin(2*Math.PI*slice), options.y+6-options.r*Math.cos(2*Math.PI*slice));   
+				}
 			});
-		ctx.stroke();
+		ctx.save();
+
+
+		ctx.translate(options.x,options.y);
+		ctx.rotate(2*Math.PI*((this.vars.plus+this.vars.angle)/this.puzzle.length));
+		ctx.drawImage(this.constructor.img,-4,-options.y/2+5,7,37);  
 		ctx.restore();
+		ctx.save();
+		ctx.translate(options.x,options.y);
+		ctx.rotate(2*Math.PI*((this.vars.angle+this.vars.minus)/this.puzzle.length));
+		ctx.drawImage(this.constructor.img,-4,-options.y/2+5,7,37);  
+		ctx.restore();
+		ctx.save();
 	},
 	renderPuzzle: function(a){
 		var canvas = this.element.find('#canvas canvas')[0], self = this;
@@ -108,17 +130,47 @@ $.Controller('Eimorhc.Breaker',
 		var options = self.constructor.defaults.canvas;
 		ctx.beginPath();
 		ctx.fillStyle = "black";
+		var l = a.length;
 		var b = new Array(a.length);
 		$.each(a, function(index, value){
 			b[value] = index+1;;
 		});
 		$.each(b, function(index, value){
-			ctx.fillText(value, options.x-6+options.R*Math.sin(2*Math.PI*index/(a.length)), options.y+6-options.R*Math.cos(2*Math.PI*index/(a.length)));   
+			var sl = index/l;
+			ctx.fillText(value, options.x-6+options.R*Math.sin(2*Math.PI*sl), options.y+6-options.R*Math.cos(2*Math.PI*sl));   
 		});
 		ctx.stroke();
 	},
-	'#reset click': function(){
+	'#new click': function(){
 		this.render();
+	},
+	'#reset click': function(){
+		var self = this;
+		$.each(this.puzzle, function(i, v){
+			self.steped[i] = false;
+			self.available[i] = true;
+		});
+		$(self.vars).animate({ angle: 0, plus: 0, minus: 0 }, { duration: 2000}).queue(function(){	
+			$(this).dequeue();
+		});
+	},
+	checkResult: function(){
+		var res = true;
+		$.each(this.steped, function(i, v){
+			res = res && v;
+		});
+		return res;
+	},
+	checkSurvive: function(){
+		var res = false, self = this;
+		$.each(this.steped, function(i, v){
+			if(!v && self.available[i])
+			{
+				res = true;
+				return false;
+			}
+		});
+		return res;
 	},
 	'canvas click': function(el, ev){
 		var self = this;
@@ -129,24 +181,54 @@ $.Controller('Eimorhc.Breaker',
 		$.each(this.puzzle, function(index, value){
 			var X = options.x-6+options.r*Math.sin(2*Math.PI*index/(self.puzzle.length));
 			var Y = options.y+6-options.r*Math.cos(2*Math.PI*index/(self.puzzle.length));   
+			steal.dev.log(X, Y);
 			var dist_square = (x - X)*(x - X) + (y - Y)*(y - Y);
-			if(dist_square <= 25*25)
+			if(dist_square <= 12*12)
 			{
-				if(self.steped[index])
+				if(self.steped[index] || !self.available[index])
 				{
 					return false;
 				}
-				steal.dev.log('match');
-				var angle = Math.atan2((Y - options.y), (X - options.x))/ Math.PI * 180.0;
-				(angle>=0 && angle <=180) ? angle += 90:((angle<0 && angle>=-90)? angle+=90: angle+=450);
-				steal.dev.log(angle);
+				steal.dev.log(index, value, X, Y);
 				self.steped[index] = true;
-				$(self.vars).animate({ angle: Math.PI*angle/180, plus: 0, minus: 0 }, { duration: 2000}).queue(function(){	
-					$(this).dequeue();
-				}).animate({ angle: Math.PI*angle/180, plus: value, minus: -value }, { duration: 2000}).queue(function(){
-					$(this).dequeue();
+				$.each(self.steped, function(i, v)
+				{
+					if(!self.steped[i] && ((index+value)%self.puzzle.length == i) ||((self.puzzle.length+index-value)%self.puzzle.length == i))
+					{
+						self.available[i] = true;
+					}
+					else
+					{
+						self.available[i] = false;
+					}
 				});
-				
+				steal.dev.log(self.puzzle);
+				steal.dev.log(self.steped);
+				steal.dev.log(self.available);
+				if(self.checkResult())
+				{
+					$('#result').html('TIMELINE SYNCHRONIZED!').css({color: '#0186d1'});
+					$(self.vars).animate({ angle: index, plus: 0, minus: 0 }, { duration: 2000}).queue(function(){	
+						$(this).dequeue();
+					}).animate({ angle: 0, plus: 0, minus: 0 }, { duration: 2000}).queue(function(){
+						$(this).dequeue();
+					});
+				}
+				else if(!self.checkSurvive())
+				{
+					$(self.vars).animate({ angle: index, plus: 0, minus: 0 }, { duration: 2000}).queue(function(){	
+						$('#result').html('TIMELINE CORRUPTED!').css({color: 'red'});
+						$(this).dequeue();
+					});
+				}
+				else
+				{
+					$(self.vars).animate({ angle: index, plus: 0, minus: 0 }, { duration: 2000}).queue(function(){	
+						$(this).dequeue();
+					}).animate({ angle: index, plus: value, minus: -value }, { duration: 2000}).queue(function(){
+						$(this).dequeue();
+					});
+				}
 				return false;
 			}
 		});
