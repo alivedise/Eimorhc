@@ -13743,7 +13743,7 @@ $.Controller('Eimorhc.Breaker',
 	},
 	init: function(){
 		this.img = new Image();  
-		this.img.src = './y.png';  
+		this.img.src = 'y.png';  
 	},
 	img: null
 },
@@ -13770,7 +13770,7 @@ $.Controller('Eimorhc.Breaker',
 			fx.elem[fx.prop] = fx.now;
 			fx.elem.updated = true;
 		};
-		this.element.html("./views/init.ejs",{}, this.callback('render'));
+		this.element.html("views/init.ejs",{}, this.callback('render'));
 		;
 	},
 	render: function(){
